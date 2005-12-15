@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<package version="2.0" xmlns="http://pear.php.net/dtd/package-2.0"
+    xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>PEAR_Frontend_Gtk2</name>
+ <channel>pear.php.net</channel>
+ <summary>Graphical PEAR installer based on PHP-Gtk2</summary>
+ <description>
+  This program is a graphical frontend for PEAR, the PHP Extension
+  and Application Repository. It uses PHP-Gtk2 as graphical toolkit
+  and lets you easily browse available packages and install them
+  on your computer.
+  The program is designed to be by end-users, making it as easy as
+  possible to install and uninstall programs.
+ </description>
+
+ <lead>
+  <name>Christian Weiske</name>
+  <user>cweiske</user>
+  <email>cweiske@php.net</email>
+  <active>yes</active>
+ </lead>
+
+ <date>2005-12-07</date>
+
+ <version>
+  <release>0.0.6</release>
+  <api>0.0.3</api>
+ </version>
+
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+
+ <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+
+ <notes>
+  * Install button changes to "upgrade" when installed package is selected
+  * Default dependency option is "onlyreqdep" now
+  * Version in About dialog is taken from package info
+ </notes>
+
+ <contents>
+  <dir name="/" baseinstalldir="PEAR/Frontend">
+   <file name="Gtk2.php" role="php"/>
+   <dir name="Gtk2">
+    <file name="About.php"          role="php">
+     <tasks:replace from="@VERSION_PEAR_Frontend_Gtk2@" to="version" type="package-info" />
+    </file>
+    <file name="Channels.php"       role="php"/>
+    <file name="Checks.php"         role="php"/>
+    <file name="Config.php"         role="php"/>
+    <file name="Installation.php"   role="php"/>
+    <file name="installer.glade"    role="php"/>
+    <file name="Package.php"        role="php"/>
+    <file name="Packages.php"       role="php"/>
+
+    <file name="run.phpw"           role="php"/>
+    <file name="runicon.png"        role="php"/>
+
+    <dir name="pixmaps">
+     <file name="default.png"                   role="php"/>
+     <file name="gnope.org.png"                 role="php"/>
+     <file name="pear.chiaraquartet.net.png"    role="php"/>
+     <file name="pear.php.net.png"              role="php"/>
+     <file name="pecl.php.net.png"              role="php"/>
+     <dir name="progress">
+      <file name="load-anim-1.png"              role="php"/>
+      <file name="load-anim-2.png"              role="php"/>
+      <file name="load-anim-3.png"              role="php"/>
+      <file name="load-anim-4.png"              role="php"/>
+     </dir>
+    </dir>
+   </dir>
+   <dir name="tests" role="test">
+    <file name="ConfigTest.php"     role="php"/>
+    <file name="ExpanderTest.phpw"  role="php"/>
+    <file name="PackageTest.php"    role="php"/>
+    <file name="runtests.php"       role="php"/>
+    <file name="TimeDiff.php"       role="php"/>
+   </dir>
+  </dir>
+ </contents>
+
+ <dependencies>
+  <required>
+   <php>
+    <min>5.1</min>
+    <max>6.0.0</max>
+   </php>
+   <pearinstaller>
+    <min>1.4.5</min>
+   </pearinstaller>
+   <package>
+    <name>Config</name>
+    <channel>pear.php.net</channel>
+    <min>1.10.4</min>
+   </package>
+   <extension>
+    <name>php-gtk</name>
+    <min>2.0.0dev</min>
+   </extension>
+  </required>
+ </dependencies>
+
+ <phprelease/>
+
+ <changelog>
+  <release>
+   <version>
+    <release>0.0.6</release>
+    <api>0.0.3</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-12-07</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Install button changes to "upgrade" when installed package is selected
+    * Default dependency option is "onlyreqdep" now
+    * Version in About dialog is taken from package info
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.0.5</release>
+    <api>0.0.3</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-12-05</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Offline-on-error works better now
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.0.4</release>
+    <api>0.0.3</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-12-04</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Fix errors when there is no internet connection
+    * PEAR cache directory is created if it doesn't exist - and no warning is thrown any more
+    * better installation ok icon
+    * Window icon - shows the php icon on windows currently
+    * When no internet connection on startup, no categories are loaded and no local packages are shown
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.0.3</release>
+    <api>0.0.3</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-12-03</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Added runicon.png for the Gnope AppRunner
+    * Fixed crash when uninstalling
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.0.2</release>
+    <api>0.0.2</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-11-30</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    - Fixed the php version check
+    - Fixed crash when no php-gtk extension was installed
+    - More comments
+    - Fixed the code according to Alan's complains:
+      - require_once without braces
+      - semi-relative include paths: PEAR/Frontend/Gtk2/Package.php instead of Package.php
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.0.1</release>
+    <api>0.0.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-11-29</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    The first public version 0.0.1 has the following features:
+    - Channel support
+    - Installing and uninstalling packages
+    - Switching options for installation: nodeps, alldeps, reqdeps
+    - Package list caching
+    - Working offline
+
+    You might note that the package transfer is very slow when starting
+    up the first time. This is because data for over 300 PEAR packages
+    need to be transferred, and for each package two separate HTTP 
+    connections are made - currently there is no better way, but I'm
+    in contact with Greg to get a better solution.
+   </notes>
+  </release>
+ </changelog>
+</package>
