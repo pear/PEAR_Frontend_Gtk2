@@ -25,11 +25,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>yes</active>
  </lead>
 
- <date>2005-12-07</date>
+ <date>2005-12-28</date>
 
  <version>
-  <release>0.0.6</release>
-  <api>0.0.3</api>
+  <release>0.0.7</release>
+  <api>0.0.4</api>
  </version>
 
  <stability>
@@ -40,9 +40,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
 
  <notes>
-  * Install button changes to "upgrade" when installed package is selected
-  * Default dependency option is "onlyreqdep" now
-  * Version in About dialog is taken from package info
+  * Fixed crash because PEAR_Frontend_Gtk2 wasn't recognized as PEAR_Frontend
  </notes>
 
  <contents>
@@ -111,6 +109,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <phprelease/>
 
  <changelog>
+  <release>
+   <version>
+    <release>0.0.7</release>
+    <api>0.0.4</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-12-28</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Fixed crash because PEAR_Frontend_Gtk2 wasn't recognized as PEAR_Frontend
+   </notes>
+  </release>
+
   <release>
    <version>
     <release>0.0.6</release>

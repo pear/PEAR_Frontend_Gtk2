@@ -651,5 +651,38 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         $this->showPackageList($this->strSelectedCategoryName);
     }//public function refreshOnlinePackages()
 
+
+
+    public function userConfirm()
+    {
+        //just to make sure that the class is recognized as proper PEAR_Frontend class
+    }
+
+
+
+    /**
+    *   A fatal error occured
+    *
+    *   @param PEAR_Error $error The error
+    */
+    public function displayFatalError($error)
+    {
+        $strMessage = $error->getMessage();
+
+        //404 occurs often and isn't that bad, so we can ignore it
+        //404 occurs, if a package exists but hasn't released a version.
+        if (strpos(strtolower($strMessage), '404 not found') === false) {
+            $dialog = new GtkMessageDialog(
+                $this->arWidgets['dlgInstaller'],
+                Gtk::DIALOG_MODAL,
+                Gtk::MESSAGE_ERROR,
+                Gtk::BUTTONS_OK,
+                'A fatal error occured:' . "\r\n" . $strMessage
+            );
+            $answer = $dialog->run();
+            $dialog->destroy();
+        }
+    }//public function displayFatalError($error)
+
 }//class PEAR_Frontend_Gtk2
 ?>
