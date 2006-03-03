@@ -3,6 +3,7 @@ require_once 'PEAR/Config.php';
 require_once 'PEAR/Frontend.php';
 
 require_once 'PEAR/Frontend/Gtk2/About.php';
+require_once 'PEAR/Frontend/Gtk2/ChannelDialog.php';
 require_once 'PEAR/Frontend/Gtk2/Channels.php';
 require_once 'PEAR/Frontend/Gtk2/Config.php';
 require_once 'PEAR/Frontend/Gtk2/Packages.php';
@@ -13,18 +14,18 @@ require_once 'PEAR/Frontend/Gtk2/Installation.php';
 *
 *   TODO:
 *   - Package categories aren't updated/extendet if there is an error at startup loading/packages are refreshed and a new category is required
-*   - channel discovery
 *   - Drop package file onto install button -> install it
 *   - Warn if the package list is older than 5 days
 *   - upgrade-all menu option
 *   - Filter by upgradeable/installed/installable/all packages
-*   - Install pecl packages - error messages aren't shown
 *
 *   Don't know how to do:
 *   - installation dialog showing has to be updated correctly
 *   - Installation: shrink window if expander is collapsed
 *
 *   Done:
+*   - Install pecl packages - error messages aren't shown
+*   - channel discovery
 *   - better installation ok icon
 *   - Window icon - shows the php icon on windows currently
 *   - When no internet connection on startup, no categories are loaded and no local packages are shown
@@ -52,6 +53,7 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
         'mnuOptDepsNo','mnuOptDepsReq','mnuOptDepsAll','mnuOptDepNothing',
         'mnuOffline','mnuQuit','mnuAbout','mnuUpdateOnline','mnuUpdateLocal',
+        'mnuChannels',
 
         'dlgProgress', 'lblDescription', 'imgProgress', 'lblProgress', 'progBar'
     );
@@ -76,6 +78,12 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
     *   @var PEAR_Frontend_Gtk2_Installation
     */
     protected $installer = null;
+
+    /**
+    *   The channel dialog
+    *   @var PEAR_Frontend_Gtk2_ChannelDialog
+    */
+    protected $channelDialog = null;
 
     protected $selectedPackage          = null;
     protected $strSelectedCategoryName  = null;
@@ -109,13 +117,7 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         $this->buildDialog();
         PEAR_Frontend_Gtk2_Config::loadConfig();
         PEAR_Frontend_Gtk2_Config::loadCurrentConfigIntoGui($this);
-
-        //After all has been initiated, load the data
-        PEAR_Frontend_Gtk2_Channels::loadChannels(
-            $this->arWidgets['cmbChannel'],
-            $this->config,
-            PEAR_Frontend_Gtk2_Config::$strDefaultChannel
-        );
+        $this->loadChannels(PEAR_Frontend_Gtk2_Config::$strDefaultChannel);
     }//public function __construct()
 
 
@@ -125,6 +127,27 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         $this->config   = PEAR_Config::singleton();
         $this->packages = new PEAR_Frontend_Gtk2_Packages($this->config);
     }//function loadConfig()
+
+
+
+    /**
+    *   Fill the channel dropdown with channel names
+    *
+    *   @param string   $strDefaultChannel  The channel to set active
+    */
+    public function loadChannels($strDefaultChannel = null)
+    {
+        if ($strDefaultChannel == null) {
+            $strDefaultChannel = $this->arWidgets['cmbChannel']->get_active_text();
+        }
+
+        //After all has been initiated, load the data
+        PEAR_Frontend_Gtk2_Channels::loadChannels(
+            $this->arWidgets['cmbChannel'],
+            $this->config,
+            $strDefaultChannel
+        );
+    }//public function loadChannels($strDefault = null)
 
 
 
@@ -172,6 +195,7 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         $this->arWidgets['mnuAbout']        ->connect_simple('activate', array('PEAR_Frontend_Gtk2_About', 'showMe'));
         $this->arWidgets['mnuUpdateLocal']  ->connect_simple('activate', array($this, 'refreshLocalPackages'));
         $this->arWidgets['mnuUpdateOnline'] ->connect_simple('activate', array($this, 'refreshOnlinePackages'));
+        $this->arWidgets['mnuChannels']     ->connect_simple('activate', array($this, 'showChannelDialog'));
 
 
         //that's channel name and array key of the packages
@@ -219,7 +243,25 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
     protected function loadInstaller()
     {
         $this->installer = new PEAR_Frontend_Gtk2_Installation($this->arWidgets['dlgInstaller'], $this->glade);
+        PEAR_Frontend::setFrontendObject($this->installer);
     }//protected function loadInstaller()
+
+
+
+    public function getInstaller()
+    {
+        return $this->installer;
+    }//public function getInstaller()
+
+
+
+    public function showChannelDialog()
+    {
+        if ($this->channelDialog === null) {
+            $this->channelDialog = new PEAR_Frontend_Gtk2_ChannelDialog($this->glade, $this);
+        }
+        $this->channelDialog->show();
+    }//public function showChannelDialog()
 
 
 

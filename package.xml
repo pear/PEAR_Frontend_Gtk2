@@ -25,22 +25,24 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>yes</active>
  </lead>
 
- <date>2005-12-28</date>
+ <date>2006-03-03</date>
 
  <version>
-  <release>0.0.7</release>
-  <api>0.0.4</api>
+  <release>0.0.8</release>
+  <api>0.0.5</api>
  </version>
 
  <stability>
-  <release>alpha</release>
+  <release>beta</release>
   <api>alpha</api>
  </stability>
 
  <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
 
  <notes>
-  * Fixed crash because PEAR_Frontend_Gtk2 wasn't recognized as PEAR_Frontend
+  * Channel discovery
+  * Building php extensions works now
+  * Fixed crash when channel didn't exist any more
  </notes>
 
  <contents>
@@ -50,6 +52,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="About.php"          role="php">
      <tasks:replace from="@VERSION_PEAR_Frontend_Gtk2@" to="version" type="package-info" />
     </file>
+    <file name="ChannelDialog.php"  role="php"/>
     <file name="Channels.php"       role="php"/>
     <file name="Checks.php"         role="php"/>
     <file name="Config.php"         role="php"/>
@@ -109,6 +112,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <phprelease/>
 
  <changelog>
+  <release>
+   <version>
+    <release>0.0.8</release>
+    <api>0.0.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-03-03</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Channel discovery
+    * Building php extensions works now
+   </notes>
+  </release>
+
   <release>
    <version>
     <release>0.0.7</release>

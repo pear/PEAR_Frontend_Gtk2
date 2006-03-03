@@ -40,6 +40,10 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
     */
     protected $arWidgets     = array();
 
+    protected $bQuitLoopOnClose  = true;
+
+    protected $nPercentage = 0;
+
 
 
     /**
@@ -104,8 +108,7 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
         $this->setCurrentIcon(Gtk::STOCK_EXECUTE);
         $this->setPercentage(0);
 
-        $buffer = $this->txtLog->get_buffer();
-        $buffer->delete($buffer->get_start_iter(), $buffer->get_end_iter());
+        $this->clearLog();
 //        $this->arWidgets['expLog']->set_expanded(false);
 
         $this->appendToLog($strText . "\r\n");
@@ -133,9 +136,68 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
         $cmd->run($strCommand, $arOptions, array($strPackagePath));
 
         //own main loop so that the next functions aren't executed until the window is closed
+        $this->bQuitLoopOnClose = true;
         Gtk::main();
     }//public function installPackage($strChannel, $strPackage, $strVersion, $bInstall = true, $strDepOptions = null)
 
+
+
+    /**
+    *   Executes a channel command
+    *
+    *   @param string   $strCommand     The command (delete, update, discover)
+    *   @param string   $strChannel     The channel name (or the url for discovering)
+    */
+    public function channelCommand($strCommand, $strChannel)
+    {
+        $this->prepareFresh();
+        $this->showMe();
+        $cmd = PEAR_Command::factory('channel-' . $strCommand, PEAR_Config::singleton());
+        $ret = $cmd->run('channel-' . $strCommand, array(), array($strChannel));
+        if (!PEAR::isError($ret)) {
+            $this->setFinished();
+        } else {
+            $this->bSeriousError = true;
+            $this->setFinished();
+            $this->setCurrentAction($ret->getMessage());
+            $this->appendToLog($ret->getMessage() . "\r\n");
+            $this->appendToLog($ret->getUserinfo() . "\r\n");
+        }
+        $this->bQuitLoopOnClose = true;
+        Gtk::main();
+    }//public function channelCommand($strCommand, $strChannel)
+
+
+
+    /**
+    *   Use this method to run commands by hand, and you need
+    *   the interface to be shown.
+    */
+    public function show($strAction, $bQuitLoopOnClose = false)
+    {
+        $this->bSeriousError = false;
+        $this->bQuitLoopOnClose = $bQuitLoopOnClose;
+        $this->prepareFresh();
+        $this->setCurrentAction($strAction);
+        $this->showMe();
+    }//public function show($strAction, $bQuitLoopOnClose = false)
+
+
+
+    /**
+    *   Prepares the widgets to have a fresh look.
+    *   Use it before starting the actual work
+    */
+    protected function prepareFresh()
+    {
+        //Bad code, but PEAR doesn't offer the possibility to do that a better way
+        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = $this;
+
+        $this->setPercentage(0);
+        $this->clearLog();
+        $this->setCurrentIcon(Gtk::STOCK_EXECUTE);
+        $this->setCurrentAction('');
+    }//protected function prepareFresh()
 
 
     protected function showMe()
@@ -152,7 +214,9 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
     {
         $this->dlgInstalling->set_modal(false);
         $this->dlgInstalling->hide();
-        Gtk::main_quit();
+        if ($this->bQuitLoopOnClose) {
+            Gtk::main_quit();
+        }
     }//public function hideMe()
 
 
@@ -175,6 +239,14 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
 
         $this->txtLog->scroll_to_iter($buffer->get_end_iter(), 0.49);
     }//protected function appendToLog($strText)
+
+
+
+    protected function clearLog()
+    {
+        $buffer = $this->txtLog->get_buffer();
+        $buffer->delete($buffer->get_start_iter(), $buffer->get_end_iter());
+    }//protected function clearLog()
 
 
 
@@ -202,12 +274,24 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
     */
     protected function setPercentage($nPercent)
     {
+        $nPercent = $nPercent % 100;
+        $this->nPercentage = $nPercent;
         if ($nPercent <= 0) {
             $this->arWidgets['progBarInstaller']->set_fraction(0);
         } else {
-            $this->arWidgets['progBarInstaller']->set_fraction(100/$nPercent);
+            $this->arWidgets['progBarInstaller']->set_fraction($nPercent/100);
         }
     }//protected function setPercentage($nPercent)
+
+
+
+    /**
+    *   Add some percent to the progress bar
+    */
+    protected function addPercentage($nPercentToAdd)
+    {
+        $this->setPercentage($this->nPercentage + $nPercentToAdd);
+    }//protected function addPercentage($nPercentToAdd)
 
 
 
@@ -215,6 +299,7 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
     {
         if ($this->bSeriousError) {
             $this->setCurrentIcon(Gtk::STOCK_DIALOG_ERROR);
+            $this->arWidgets['expLog']->set_expanded(true);
         } else {
             $this->setCurrentIcon(Gtk::STOCK_APPLY);
         }
@@ -237,10 +322,10 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
     /**
     *   All functions which might be expected in a PEAR_Frontend go here
     */
-
-
     public function outputData($data, $command = null)
     {
+        $this->addPercentage(5);
+
         switch ($command) {
             case 'install':
             case 'upgrade':
@@ -261,32 +346,51 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
                 }
                 $this->setFinished();
                 break;
+            case 'channel-discover':
+            case 'channel-delete':
+                $this->setCurrentAction($data);
+                $this->appendToLog($data . "\r\n");
+                $this->setFinished();
+                break;
+
+            case 'build':
+                $this->appendToLog($data . "\r\n");
+                break;
 
             default:
 if ($command !== null) {
-    var_dump($command);
+    echo 'Unsupported command in outputData: '; var_dump($command);
 }
-                if (isset($data['headline'])) {
+                if (!is_array($data)) {
+                    $this->setCurrentAction($data);
+                    $this->appendToLog($data . "\r\n");
+                    if (strpos($data, 'is up to date') !== false) {
+                        $this->setFinished();
+                    } else if (strpos(strtolower($data), 'error:') !== false) {
+                        $this->bSeriousError = true;
+                        $this->setFinished();
+                    }
+
+                } else if (isset($data['headline'])) {
                     $this->setCurrentAction($data['headline']);
                     $this->appendToLog('!!!' . $data['headline'] . '!!!' . "\r\n");
-
-                    if (stripos($data['headline'], 'error') !== false) {
-                        $this->setCurrentIcon(Gtk::STOCK_DIALOG_ERROR);
-                        $this->arWidgets['expLog']->set_expanded(true);
+                    if (stripos(strtolower($data['headline']), 'error') !== false) {
+                        $this->bSeriousError = true;
+                        $this->setFinished();
+                    }
+                    if (is_array($data['data'])) {
+                        //could somebody tell me if there is a fixed format?
+                        foreach ($data['data'] as $nId => $arSubData) {
+                            $this->appendToLog(implode(' / ', $arSubData) . "\r\n");
+                        }
+                    } else if (is_string($data['data'])) {
+                        $this->appendToLog($data['data'] . "\r\n");
+                    } else {
+                        //What's this?
+                        $this->appendToLog('PEAR_Frontend_Gtk2_Installation::outputData: Unhandled type "' . gettype($data['data']) . "\"\r\n");
                     }
                 }
 
-                if (is_array($data['data'])) {
-                    //could somebody tell me if there is a fixed format?
-                    foreach ($data['data'] as $nId => $arSubData) {
-                        $this->appendToLog(implode(' / ', $arSubData) . "\r\n");
-                    }
-                } else if (is_string($data['data'])) {
-                    $this->appendToLog($data['data'] . "\r\n");
-                } else {
-                    //What's this?
-                    $this->appendToLog('PEAR_Frontend_Gtk2_Installation::outputData: Unhandled type "' . gettype($data['data']) . "\"\r\n");
-                }
                 while (Gtk::events_pending()) { Gtk::main_iteration();}
                 break;
         }
@@ -294,16 +398,43 @@ if ($command !== null) {
 
 
 
-    function log($msg, $append_crlf = true)
+    public function log($msg, $append_crlf = true)
     {
 //require_once 'Gtk2/VarDump.php'; new Gtk2_VarDump(array($level, $msg, $append_crlf), 'msg');
-        if (strpos($msg, 'is required by installed package') !== false) {
+        if (strpos($msg, 'is required by installed package') !== false
+            || strpos(strtolower($msg), 'error:')
+        ) {
             $this->bSeriousError = true;
         }
+        if ($msg == '.' || $append_crlf === false) {
+            $this->addPercentage(1);
+        } else {
+            $this->addPercentage(10);
+        }
 
-        $this->appendToLog($msg . "\r\n");
+        $this->appendToLog($msg . ($append_crlf ? "\r\n":''));
         while (Gtk::events_pending()) { Gtk::main_iteration();}
-    }//function log($msg, $append_crlf = true)
+    }//public function log($msg, $append_crlf = true)
+
+
+
+    /**
+    *   Ask the user a question
+    *
+    *   @param string   $prompt     The question to ask
+    *   @param string   $default    The default value
+    */
+    public function userConfirm($prompt, $default = 'yes')
+    {
+        $dialog = new GtkMessageDialog(
+            $this->arWidgets['dlgInstalling'], Gtk::DIALOG_MODAL, Gtk::MESSAGE_QUESTION,
+            Gtk::BUTTONS_YES_NO, $prompt
+        );
+        $answer = $dialog->run();
+        $dialog->destroy();
+
+        return ($answer == Gtk::RESPONSE_YES);
+    }//public function userConfirm($prompt, $default = 'yes')
 
 
 }//class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend

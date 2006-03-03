@@ -172,6 +172,9 @@ class PEAR_Frontend_Gtk2_Packages
     {
         $config     = PEAR_Config::singleton();
         $channel    = $config->getRegistry()->getChannel($strChannel);
+        if ($channel === false) {
+            throw new Exception('Channel "' . $strChannel . '" doesn\'t exist');
+        }
         $strBaseUrl = $channel->getBaseURL('REST1.0');
         $strServer  = $channel->getServer();
         $rest       = $config->getREST('1.0');
