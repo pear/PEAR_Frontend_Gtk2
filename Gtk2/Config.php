@@ -60,6 +60,12 @@ class PEAR_Frontend_Gtk2_Config
     public static $strDefaultChannel = 'gnope.org';
 
     /**
+    *   The package which is selected first.
+    *   @var string
+    */
+    public static $strDefaultPackage = null;
+
+    /**
     *   Work offline? If yes, then no internet connection is established.
     *   @var boolean
     */
@@ -111,8 +117,108 @@ class PEAR_Frontend_Gtk2_Config
         self::$bWorkOffline     = (boolean)$arConf['offline'];
         self::$strDepOptions    = (string) $arConf['depOption'];
 
+        self::loadCommandLineArguments();
+
         return true;
     }//public static function loadConfig()
+
+
+
+    /**
+    *   Loads some command line arguments into the config.
+    *   Args are:
+    *   * -c channelname        Select channelname
+    *   * -O                    Work offline
+    *   * -a                    All dependencies
+    *   * -o                    Only required dependencies
+    *   * -n                    No dependencies
+    *   * -v                    Version information
+    */
+    protected static function loadCommandLineArguments()
+    {
+        //we can't use argc here because "pear -G" removes
+        // the first element
+        if (count($GLOBALS['argv']) <= 1) {
+            return;
+        }
+
+        $nCurrentPos = 1;
+        do {
+            switch ($GLOBALS['argv'][$nCurrentPos]) {
+                case '-c':
+                case '--channel':
+                    if ($GLOBALS['argc'] > $nCurrentPos + 1) {
+                        self::$strDefaultChannel = $GLOBALS['argv'][++$nCurrentPos];
+                    }
+                    break;
+                case '-p':
+                case '--package':
+                    if ($GLOBALS['argc'] > $nCurrentPos + 1) {
+                        self::$strDefaultPackage = $GLOBALS['argv'][++$nCurrentPos];
+                    }
+                    break;
+                case '-O':
+                    self::$bWorkOffline = true;
+                    break;
+                case '-n':
+                case '--nodeps':
+                    self::$strDepOptions = 'nodeps';
+                    break;
+                case '-a':
+                case '--alldeps':
+                    self::$strDepOptions = 'alldeps';
+                    break;
+                case '-o':
+                case '--onlyreqdeps':
+                    self::$strDepOptions = 'onlyreqdeps';
+                    break;
+                case '-v':
+                case '--version':
+                    echo "PEAR_Frontend_Gtk2 version @VERSION_PEAR_Frontend_Gtk2@\r\n";
+                    exit;
+                    break;
+                case '-h':
+                case '--help':
+echo <<<HELP
+pear -G [options]
+
+Shows the Gtk2 PEAR Frontend that allows managing
+(installing/uninstalling) packages and channels.
+
+  -c, --channel channelname
+        Show channelname package on startup
+  -p, --package [channel/]packagename
+        Select the given package on startup
+  -n, --nodeps
+        ignore dependencies, upgrade anyway
+  -a, --alldeps
+        install all required and optional dependencies
+  -o, --onlyreqdeps
+        install all required dependencies
+  -O, --offline
+        do not attempt to download any urls or contact channels
+
+
+HELP;
+                    exit;
+                    break;
+            }
+        } while (++$nCurrentPos < count($GLOBALS['argv']));
+
+        if (self::$strDefaultPackage !== null) {
+            $arSplit = explode('/', self::$strDefaultPackage);
+            if (count($arSplit) == 2) {
+                self::$strDefaultChannel = $arSplit[0];
+                self::$strDefaultPackage = $arSplit[1];
+            }
+        }
+        if (self::$strDefaultChannel !== null) {
+            self::$strDefaultChannel =
+                PEAR_Config::singleton()->getRegistry()->_getChannelFromAlias(
+                    self::$strDefaultChannel
+                );
+        }
+    }//protected static function loadCommandLineArguments()
 
 
 

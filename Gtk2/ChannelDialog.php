@@ -112,9 +112,9 @@ class PEAR_Frontend_Gtk2_ChannelDialog
     */
     public function onAdd()
     {
-        require_once 'Gtk2/InputDialog.php';
+        require_once 'Gtk2/EntryDialog.php';
 
-        $id = new Gtk2_InputDialog($this->arWidgets['dlgChannels'],
+        $id = new Gtk2_EntryDialog($this->arWidgets['dlgChannels'],
             Gtk::DIALOG_MODAL, Gtk::MESSAGE_QUESTION,
             Gtk::BUTTONS_OK, 'Please type the channel url', ''
         );

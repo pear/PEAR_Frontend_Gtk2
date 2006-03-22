@@ -114,10 +114,11 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
     public function __construct()
     {
         $this->loadConfig();
-        $this->buildDialog();
         PEAR_Frontend_Gtk2_Config::loadConfig();
+        $this->buildDialog();
         PEAR_Frontend_Gtk2_Config::loadCurrentConfigIntoGui($this);
         $this->loadChannels(PEAR_Frontend_Gtk2_Config::$strDefaultChannel);
+        $this->selectPackageByName(PEAR_Frontend_Gtk2_Config::$strDefaultPackage);
     }//public function __construct()
 
 
@@ -425,6 +426,44 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
             }
         }
     }//protected function showPackageList($strCategory)
+
+
+
+    /**
+    *   Selects the given package
+    *
+    *   @param string $strPackage   The package name (without channel!)
+    */
+    public function selectPackageByName($strPackage)
+    {
+        if ($strPackage === null) {
+            return;
+        }
+
+        //select the "*all*" category to make sure the package
+        // is shown
+        $selection = $this->arWidgets['lstCategories']->get_selection();
+        $model     = $this->arWidgets['lstCategories']->get_model();
+        $selection->select_iter(
+            $model->get_iter_from_string(
+                //gets number of children - 1 = from 0
+                $model->iter_n_children(null) - 1
+            )
+        );
+
+        //now, select the package
+        $model = $this->arWidgets['lstPackages']->get_model();
+        $iter  = $model->get_iter_first();
+        while ($iter !== null) {
+            if ($model->get_value($iter, 0) == $strPackage) {
+                $this->arWidgets['lstPackages']->get_selection()->select_iter(
+                    $iter
+                );
+                break;
+            }
+            $iter = $model->iter_next($iter);
+        }
+    }//public function selectPackageByName($strPackage)
 
 
 
