@@ -1,4 +1,5 @@
 <?php
+require_once 'PEAR/Frontend/Gtk2/Checks.php';
 require_once 'PEAR/Config.php';
 require_once 'PEAR/Frontend.php';
 
@@ -16,17 +17,18 @@ require_once 'Gtk2/FileDrop.php';
 *
 *   TODO:
 *   - Package categories aren't updated/extendet if there is an error at startup loading/packages are refreshed and a new category is required
-*   - Drop package file onto install button -> install it
 *   - Warn if the package list is older than 5 days
 *   - upgrade-all menu option
 *   - Filter by upgradeable/installed/installable/all packages
 *   - Channel server icons in channel.xml -> use them and cache locally
+*   - Config settings window
 *
 *   Don't know how to do:
 *   - installation dialog showing has to be updated correctly
 *   - Installation: shrink window if expander is collapsed
 *
 *   Done:
+*   - Drop package file onto install button -> install it
 *   - Install pecl packages - error messages aren't shown
 *   - channel discovery
 *   - better installation ok icon
