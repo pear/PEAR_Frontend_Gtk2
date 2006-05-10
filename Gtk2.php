@@ -9,6 +9,8 @@ require_once 'PEAR/Frontend/Gtk2/Config.php';
 require_once 'PEAR/Frontend/Gtk2/Packages.php';
 require_once 'PEAR/Frontend/Gtk2/Installation.php';
 
+require_once 'Gtk2/FileDrop.php';
+
 /**
 *   Graphical frontend for PEAR, based on PHP-Gtk2
 *
@@ -18,6 +20,7 @@ require_once 'PEAR/Frontend/Gtk2/Installation.php';
 *   - Warn if the package list is older than 5 days
 *   - upgrade-all menu option
 *   - Filter by upgradeable/installed/installable/all packages
+*   - Channel server icons in channel.xml -> use them and cache locally
 *
 *   Don't know how to do:
 *   - installation dialog showing has to be updated correctly
@@ -52,8 +55,9 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         'btnInstall','btnUninstall','lblBtnInstall','evboxSelectedCategory','expPackageInfo',
 
         'mnuOptDepsNo','mnuOptDepsReq','mnuOptDepsAll','mnuOptDepNothing',
+        'mnuOptForce',
         'mnuOffline','mnuQuit','mnuAbout','mnuUpdateOnline','mnuUpdateLocal',
-        'mnuChannels',
+        'mnuChannels','mnuConfig','mnuInstallLocal',
 
         'dlgProgress', 'lblDescription', 'imgProgress', 'lblProgress', 'progBar'
     );
@@ -94,6 +98,13 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
     *   @var PEAR_Frontend_Gtk2_Packages
     */
     protected $packages = null;
+
+    /**
+    *   Last package file that has been installed
+    *
+    *   @var string
+    */
+    protected $strLastFile = null;
 
     const CATEGORY_ALL      = 12345678;
     const CATEGORY_SELECTED = 12345679;
@@ -189,11 +200,27 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         $this->arWidgets['btnInstall']  ->connect_simple('clicked', array($this, 'installPackage'), true);
         $this->arWidgets['btnUninstall']->connect_simple('clicked', array($this, 'installPackage'), false);
 
+        //drop files onto install button
+        Gtk2_FileDrop::attach(
+            $this->arWidgets['btnInstall'],
+            array('application/x-tgz','.tgz'),
+            array($this, 'onFilesDropped'),
+            false
+        );
+        //and onto package list
+        Gtk2_FileDrop::attach(
+            $this->arWidgets['lstPackages'],
+            array('application/x-tgz','.tgz'),
+            array($this, 'onFilesDropped'),
+            false
+        );
+
         $this->arWidgets['dlgProgress']->connect('delete-event', array($this, 'deleteProgressWindow'));
 
         //Menu entries
         $this->arWidgets['mnuQuit']         ->connect_simple('activate', array($this, 'quitApp'));
         $this->arWidgets['mnuAbout']        ->connect_simple('activate', array('PEAR_Frontend_Gtk2_About', 'showMe'));
+        $this->arWidgets['mnuInstallLocal'] ->connect_simple('activate', array($this, 'onInstallLocalPackage'));
         $this->arWidgets['mnuUpdateLocal']  ->connect_simple('activate', array($this, 'refreshLocalPackages'));
         $this->arWidgets['mnuUpdateOnline'] ->connect_simple('activate', array($this, 'refreshOnlinePackages'));
         $this->arWidgets['mnuChannels']     ->connect_simple('activate', array($this, 'showChannelDialog'));
@@ -625,7 +652,8 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
             $package->getName(),
             $package->getLatestVersion(),
             $bInstall,
-            PEAR_Frontend_Gtk2_Config::$strDepOptions
+            PEAR_Frontend_Gtk2_Config::$strDepOptions,
+            PEAR_Frontend_Gtk2_Config::$bForceInstall
         );
 
         $package->refreshLocalInfo();
@@ -734,10 +762,86 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
 
 
+    /**
+    *   Let the user select a .tgz package file that will be installed.
+    */
+    public function onInstallLocalPackage()
+    {
+        $fcd = new GtkFileChooserDialog(
+            'Select a package file to install',
+            $this->arWidgets['dlgInstaller'],
+            Gtk::FILE_CHOOSER_ACTION_OPEN,
+            array(
+                Gtk::STOCK_CANCEL, Gtk::RESPONSE_NO,
+                Gtk::STOCK_OPEN, Gtk::RESPONSE_YES
+            )
+        );
+        $fcd->set_select_multiple(false);
+        if ($this->strLastFile !== null) {
+            $fcd->set_filename($this->strLastFile);
+        }
+
+        $ffilter = new GtkFileFilter();
+        $ffilter->add_pattern('*.tgz');
+        $ffilter->add_pattern('*');
+        $fcd->set_filter($ffilter);
+
+        if ($fcd->run() == Gtk::RESPONSE_NO) {
+            $fcd->destroy();
+            return;
+        }
+        $strFile = $fcd->get_filename();
+        $fcd->destroy();
+        if (!file_exists($strFile)) {
+            //FIXME: Error message
+            return;
+        }
+
+        $this->installFile($strFile);
+    }//public function onInstallLocalPackage()
+
+
+
+    /**
+    *   Some files have been dropped on the install button
+    */
+    public function onFilesDropped($widget, $arFiles)
+    {
+        $strFile = reset($arFiles);
+        $this->installFile($strFile);
+    }//public function onFilesDropped($widget, $arFiles)
+
+
+
+    /**
+    *   Install the given package file
+    *
+    *   @param string $strFile  File to install
+    */
+    protected function installFile($strFile)
+    {
+        //get changes done in gui into config
+        PEAR_Frontend_Gtk2_Config::loadConfigurationFromGui($this);
+
+        $this->installer->installPackage(
+            null,
+            $strFile,
+            null,
+            true,
+            PEAR_Frontend_Gtk2_Config::$strDepOptions,
+            PEAR_Frontend_Gtk2_Config::$bForceInstall
+        );
+
+        $this->refreshLocalPackages();
+        $this->strLastFile = $strFile;
+    }//protected function installFile($strFile)
+
+
+
     public function userConfirm()
     {
         //just to make sure that the class is recognized as proper PEAR_Frontend class
-    }
+    }//public function userConfirm()
 
 
 

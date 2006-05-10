@@ -87,12 +87,15 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
 
     /**
     *   Installs (or uninstalls) the given package.
+    *   If you want to install a file, set $strChannel and $strVersion
+    *   to NULL.
     *
-    *   @param string   $strPackage The package to install
     *   @param string   $strChannel The channel on which the package can be found
+    *   @param string   $strPackage The package to install
+    *   @param string   $strVersion Package version to install
     *   @param boolean  $bInstall   If the package shall be installed (true) or uninstalled (false)
     */
-    public function installPackage($strChannel, $strPackage, $strVersion, $bInstall = true, $strDepOptions = null)
+    public function installPackage($strChannel, $strPackage, $strVersion, $bInstall = true, $strDepOptions = null, $bForce = false)
     {
         //Bad code, but PEAR doesn't offer the possibility to do that a better way
         $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = $this;
@@ -117,11 +120,17 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
 
         $cmd              = PEAR_Command::factory('install', PEAR_Config::singleton());
         if ($bInstall) {
-            $strPackagePath = 'channel://' . $strChannel . '/' . $strPackage . '-' . $strVersion;
-            $strCommand       = 'upgrade';
+            if ($strChannel === null && $strVersion === null) {
+                //Install file
+                $strPackagePath = $strPackage;
+                $strCommand     = 'upgrade';
+            } else {
+                $strPackagePath = 'channel://' . $strChannel . '/' . $strPackage . '-' . $strVersion;
+                $strCommand     = 'upgrade';
+            }
         } else {
-            $strPackagePath = 'channel://' . $strChannel . '/' . $strPackage;
-            $strCommand       = 'uninstall';
+            $strPackagePath     = 'channel://' . $strChannel . '/' . $strPackage;
+            $strCommand         = 'uninstall';
         }
         $this->strCommand = $strCommand;
 
@@ -132,13 +141,16 @@ class PEAR_Frontend_Gtk2_Installation extends PEAR_Frontend
         } else {
             $arOptions = array();
         }
+        if ($bForce) {
+            $arOptions['force'] = true;
+        }
 
         $cmd->run($strCommand, $arOptions, array($strPackagePath));
 
         //own main loop so that the next functions aren't executed until the window is closed
         $this->bQuitLoopOnClose = true;
         Gtk::main();
-    }//public function installPackage($strChannel, $strPackage, $strVersion, $bInstall = true, $strDepOptions = null)
+    }//public function installPackage($strChannel, $strPackage, $strVersion, $bInstall = true, $strDepOptions = null, $bForce = false)
 
 
 

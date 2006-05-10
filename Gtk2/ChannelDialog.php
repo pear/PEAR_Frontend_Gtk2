@@ -70,12 +70,12 @@ class PEAR_Frontend_Gtk2_ChannelDialog
 
         $colAlias = new GtkTreeViewColumn('Alias', $cell_renderer, "text", 1);
         $colAlias->set_resizable(true);
-        $colAlias->set_sort_column_id(0);
+        $colAlias->set_sort_column_id(1);
         $this->arWidgets['lstChannels']->append_column($colAlias);
 
         $colSummary = new GtkTreeViewColumn('Summary', $cell_renderer, "text", 2);
         $colSummary->set_resizable(true);
-        $colSummary->set_sort_column_id(1);
+        $colSummary->set_sort_column_id(2);
         $this->arWidgets['lstChannels']->append_column($colSummary);
 
         $selection = $this->arWidgets['lstChannels']->get_selection();

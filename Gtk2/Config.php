@@ -72,6 +72,12 @@ class PEAR_Frontend_Gtk2_Config
     public static $bWorkOffline = false;
 
     /**
+    *   Force installation?
+    *   @var boolean
+    */
+    public static $bForceInstall = false;
+
+    /**
     *   What dependency option should be used when installing
     *   a package.
     *   One of: onlyreqdeps, alldeps, nodeps or "".
@@ -116,6 +122,7 @@ class PEAR_Frontend_Gtk2_Config
 
         self::$bWorkOffline     = (boolean)$arConf['offline'];
         self::$strDepOptions    = (string) $arConf['depOption'];
+        self::$bForceInstall    = (boolean)$arConf['force'];
 
         self::loadCommandLineArguments();
 
@@ -130,6 +137,7 @@ class PEAR_Frontend_Gtk2_Config
     *   * -c channelname        Select channelname
     *   * -O                    Work offline
     *   * -a                    All dependencies
+    *   * -f                    Force installation
     *   * -o                    Only required dependencies
     *   * -n                    No dependencies
     *   * -v                    Version information
@@ -150,6 +158,10 @@ class PEAR_Frontend_Gtk2_Config
                     if ($GLOBALS['argc'] > $nCurrentPos + 1) {
                         self::$strDefaultChannel = $GLOBALS['argv'][++$nCurrentPos];
                     }
+                    break;
+                case '-f':
+                case '--force':
+                    self::$bForceInstall = true;
                     break;
                 case '-p':
                 case '--package':
@@ -190,13 +202,15 @@ Shows the Gtk2 PEAR Frontend that allows managing
   -p, --package [channel/]packagename
         Select the given package on startup
   -n, --nodeps
-        ignore dependencies, upgrade anyway
+        Ignore dependencies, upgrade anyway
   -a, --alldeps
-        install all required and optional dependencies
+        Install all required and optional dependencies
   -o, --onlyreqdeps
-        install all required dependencies
+        Install all required dependencies
+  -f, --force
+        Force installation
   -O, --offline
-        do not attempt to download any urls or contact channels
+        Do not attempt to download any urls or contact channels
 
 
 HELP;
@@ -250,8 +264,9 @@ HELP;
     public static function getConfigArray()
     {
         return array(
-            'offline' => self::$bWorkOffline,
-            'depOption' => self::$strDepOptions
+            'offline'   => self::$bWorkOffline,
+            'depOption' => self::$strDepOptions,
+            'force'     => self::$bForceInstall
         );
     }//public static function getConfigArray()
 
@@ -279,6 +294,7 @@ HELP;
     public static function loadCurrentConfigIntoGui(PEAR_Frontend_Gtk2 $fe)
     {
         $fe->getWidget('mnuOffline')   ->set_active(self::$bWorkOffline);
+        $fe->getWidget('mnuOptForce')  ->set_active(self::$bForceInstall);
         foreach (self::$arDepWidgets as $strValue => $strWidget) {
             $fe->getWidget($strWidget)->set_active(self::$strDepOptions == $strValue);
         }
@@ -296,13 +312,26 @@ HELP;
     */
     public static function loadConfigurationFromGui(PEAR_Frontend_Gtk2 $fe)
     {
-        self::$bWorkOffline = $fe->getWidget('mnuOffline')->get_active();
+        self::$bWorkOffline  = $fe->getWidget('mnuOffline')->get_active();
+        self::$bForceInstall = $fe->getWidget('mnuOptForce')->get_active();
         foreach (self::$arDepWidgets as $strValue => $strWidget) {
             if ($fe->getWidget($strWidget)->get_active()) {
                 self::$strDepOptions = $strValue;
             }
         }
     }//public static function loadConfigurationFromGui(PEAR_Frontend_Gtk2 $fe)
+
+
+
+    public static function getInstallOptionString()
+    {
+        $strOpt = self::$strDepOptions;
+        if (self::$bForceInstall) {
+            $strOpt .= ' -f';
+        }
+
+        return $strOpt;
+    }//public static function getInstallOptionString()
 
 }//class PEAR_Frontend_Gtk2_Config
 ?>

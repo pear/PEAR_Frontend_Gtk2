@@ -25,10 +25,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>yes</active>
  </lead>
 
- <date>2006-03-22</date>
+ <date>2006-05-10</date>
 
  <version>
-  <release>0.1.0</release>
+  <release>0.1.1</release>
   <api>0.1.0</api>
  </version>
 
@@ -40,10 +40,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
 
  <notes>
-  * Gtk2_EntryDialog dependency
-  * Command line options
-  * Channel can be pre-selected
-  * Package can be pre-selected
+  * Gtk2_FileDrop dependency
+  * Allow installation of local package files
+  * Drag and Drop package files onto package list to install them
+  * Force installation option
  </notes>
 
  <contents>
@@ -110,6 +110,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <channel>pear.php.net</channel>
     <min>0.0.3</min>
    </package>
+   <package>
+    <name>Gtk2_FileDrop</name>
+    <channel>pear.php.net</channel>
+    <min>0.1.0</min>
+   </package>
    <extension>
     <name>php-gtk</name>
     <min>2.0.0dev</min>
@@ -120,6 +125,25 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <phprelease/>
 
  <changelog>
+  <release>
+   <version>
+    <release>0.1.1</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-05-10</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.html">LGPL</license>
+   <notes>
+    * Gtk2_FileDrop dependency
+    * Allow installation of local package files
+    * Drag and Drop package files onto package list to install them
+    * Force installation option
+   </notes>
+  </release>
+
   <release>
    <version>
     <release>0.1.0</release>
