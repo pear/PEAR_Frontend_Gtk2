@@ -310,6 +310,10 @@ class PEAR_Frontend_Gtk2_Packages
                 }
                 throw new Exception($inf->getMessage());
             }
+            if (!is_array($inf) || !is_array($inf['ca'])) {
+                //something went wrong retrieving the file.
+                throw new Exception('Something went wrong retrieving infos about '. $package->getName());
+            }
             if ($inf['ca']['_content'] !== null) {
                 $package->setCategory(   $inf['ca']['_content']);
             }
