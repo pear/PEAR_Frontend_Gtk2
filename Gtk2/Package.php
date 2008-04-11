@@ -58,7 +58,9 @@ class PEAR_Frontend_Gtk2_Package
     public function refreshLocalInfo()
     {
         $config = PEAR_Config::singleton();
-        $arData = $config->getRegistry()->packageInfo($this->getName(), null, $this->getChannel());
+        $arData = $config->getRegistry()->packageInfo(
+            $this->getName(), null, $this->getChannel()
+        );
 
         if ($arData === null) {
             //no local package data -> uninstalled or not available

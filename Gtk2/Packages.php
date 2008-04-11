@@ -6,7 +6,7 @@ require_once 'PEAR/Config.php';
 *   This class deals with packages: local package loading,
 *   remote package loading and so.
 *
-*   The callback is called after everything has been finished 
+*   The callback is called after everything has been finished
 *   with parameters (true, true) to signal that it's done.
 *
 *   @author Christian Weiske <cweiske@php.net>
@@ -120,6 +120,10 @@ class PEAR_Frontend_Gtk2_Packages
     */
     public static function getLocalPackages($strChannel, $arLocalPackages = array())
     {
+        if ($strChannel === null) {
+            return array();
+        }
+
         $config        = PEAR_Config::singleton();
         $arRawPackages = $config->getRegistry()->packageInfo(null, null, $strChannel);
         $arExisting    = is_null($arLocalPackages) ? array() : array_keys($arLocalPackages);
@@ -168,11 +172,13 @@ class PEAR_Frontend_Gtk2_Packages
     *   @throws Exception If the channel has no REST support or if the connection failed
     *   @static
     */
-    public static function getRemotePackages($strChannel, $bLoadPackageData = true, $callback = null, $arExistingPackages = array(), $bWorkOffline = false)
-    {
+    public static function getRemotePackages(
+        $strChannel, $bLoadPackageData = true, $callback = null,
+        $arExistingPackages = array(), $bWorkOffline = false
+    ) {
         $config     = PEAR_Config::singleton();
         $channel    = $config->getRegistry()->getChannel($strChannel);
-        if ($channel === false) {
+        if ($channel === false || PEAR::isError($channel)) {
             throw new Exception('Channel "' . $strChannel . '" doesn\'t exist');
         }
         $strBaseUrl = $channel->getBaseURL('REST1.0');
@@ -269,7 +275,7 @@ class PEAR_Frontend_Gtk2_Packages
     *   @param array    $arRemotePackages   Array with PEAR_Frontend_Gtk2_Package-s
     *   @param string   $strChannel         The channel name to retrieve packages from
     *   @param callback $callback           The callback to call after a package info has been loaded
-    *   @param boolean  $bWorkOffline       If the local cache *only* shall be used, or (if no local cache is there) 
+    *   @param boolean  $bWorkOffline       If the local cache *only* shall be used, or (if no local cache is there)
     *                                           an connection to the internet server shall be made
     *   @param boolean  $bUseCache          If the cache shall be used. If not, the only chance to get package data is
     *                                           reading them from the online server (if $bWorkOffline is false)
@@ -350,7 +356,7 @@ class PEAR_Frontend_Gtk2_Packages
     *   @param string       $url            The URL to get the data from
     *   @param PEAR_Config  $config         The PEAR configuration
     *   @param PEAR_REST    $rest           The REST object which can be used to retrieve the data
-    *   @param boolean      $bWorkOffline   If the local cache *only* shall be used, or (if no local cache is there) 
+    *   @param boolean      $bWorkOffline   If the local cache *only* shall be used, or (if no local cache is there)
     *                                           an connection to the internet server shall be made
     *   @param boolean      $bUseCache      If the cache shall be used. If not, the only chance to get package data is
     *                                           reading them from the online server (if $bWorkOffline is false)
@@ -450,6 +456,10 @@ class PEAR_Frontend_Gtk2_Packages
         if ($strChannel === null) {
             $strChannel = $this->strActiveChannel;
         }
+        if ($this->strActiveChannel === null) {
+            $strChannel = 'pear.php.net';
+        }
+
         $this->arPackages[$strChannel] = self::getLocalPackages($strChannel, $this->arPackages[$strChannel]);
         return $this->arPackages[$strChannel];
     }//public function refreshLocalPackages($strChannel = null)
@@ -457,7 +467,7 @@ class PEAR_Frontend_Gtk2_Packages
 
 
     /**
-    *   Refreshs the package list of the given channel by re-reading the remote 
+    *   Refreshs the package list of the given channel by re-reading the remote
     *   package information.
     *
     *   @param string   $strChannel     The channel to update. If NULL, the active one is used

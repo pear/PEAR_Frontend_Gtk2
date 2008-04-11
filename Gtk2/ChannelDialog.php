@@ -19,7 +19,7 @@ class PEAR_Frontend_Gtk2_ChannelDialog
 
     /**
     *   Requested widgets are loaded from glade into this array.
-    *   So this is an associative array with all required widgets 
+    *   So this is an associative array with all required widgets
     *   from the glade file: name => widget object
     *   @var array
     */
@@ -58,7 +58,9 @@ class PEAR_Frontend_Gtk2_ChannelDialog
         foreach (self::$arRequestedWidgets as $strWidgetName) {
             $this->arWidgets[$strWidgetName] = $glade->get_widget($strWidgetName);
         }
-        $model = new GtkListStore(Gtk::TYPE_STRING, Gtk::TYPE_STRING, Gtk::TYPE_STRING);
+        $model = new GtkListStore(
+            Gobject::TYPE_STRING, Gobject::TYPE_STRING, Gobject::TYPE_STRING
+        );
         $this->arWidgets['lstChannels']->set_model($model);
 
         $cell_renderer = new GtkCellRendererText();

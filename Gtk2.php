@@ -73,7 +73,7 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
     /**
     *   Requested widgets are loaded from glade into this array.
-    *   So this is an associative array with all required widgets 
+    *   So this is an associative array with all required widgets
     *   from the glade file: name => widget object
     *   @var array
     */
@@ -114,7 +114,7 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
 
     /**
-    *   Special categories which are added to the 
+    *   Special categories which are added to the
     *   channel categories
     *   @var array
     */
@@ -194,7 +194,9 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
         $this->arWidgets['cmbChannel']->connect('changed', array($this, 'selectChannel'));
 
-        $this->arWidgets['lstCategories']->set_model(new GtkListStore(Gtk::TYPE_STRING, Gtk::TYPE_STRING));
+        $this->arWidgets['lstCategories']->set_model(
+            new GtkListStore(Gobject::TYPE_STRING, Gobject::TYPE_STRING)
+        );
         $cell_renderer = new GtkCellRendererText();
         $column = new GtkTreeViewColumn('test', $cell_renderer, "text", 0);
         $this->arWidgets['lstCategories']->append_column($column);
@@ -229,7 +231,13 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
 
 
         //that's channel name and array key of the packages
-        $this->arWidgets['lstPackages']->set_model(new GtkListStore(Gtk::TYPE_STRING, Gtk::TYPE_STRING, Gtk::TYPE_STRING, Gtk::TYPE_STRING, Gtk::TYPE_PHP_VALUE));
+        $this->arWidgets['lstPackages']->set_model(
+            new GtkListStore(
+                Gobject::TYPE_STRING, Gobject::TYPE_STRING,
+                Gobject::TYPE_STRING, Gobject::TYPE_STRING,
+                Gobject::TYPE_PHP_VALUE
+            )
+        );
         $cell_renderer = new GtkCellRendererText();
 
         $colName = new GtkTreeViewColumn('Package', $cell_renderer, "text", 0);
@@ -306,6 +314,9 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
     public function selectChannel($cmbChannel, $bSecondTime = false)
     {
         $strChannel = $cmbChannel->get_active_text();
+        if ($strChannel === null) {
+            return;
+        }
 
         $this->setChannelStyles($strChannel);
 
@@ -322,7 +333,10 @@ class PEAR_Frontend_Gtk2 extends PEAR_Frontend
         }
 
         try {
-            $arCategories = $this->packages->getCategories(array($this, 'packagesCallback'), $this->getWorkOffline());
+            $arCategories = $this->packages->getCategories(
+                array($this, 'packagesCallback'),
+                $this->getWorkOffline()
+            );
         } catch (Exception $e) {
             $this->hideProgressDialog();
             $dialog = new GtkMessageDialog(
