@@ -13,12 +13,13 @@ class PEAR_Frontend_Gtk2_About extends GtkAboutDialog
     public function __construct()
     {
         parent::__construct();
+        $this->connect_simple('response', array($this, 'destroy'));
+
         $this->set_title('About PEAR package installer');
         $this->set_version('@VERSION_PEAR_Frontend_Gtk2@');
         $this->set_name('PEAR package installer');
 
         $this->set_license("This program is licensed under the LGPL v2.1");
-
         $this->set_comments('Programmed by Christian Weiske <cweiske@php.net>'
             . "\r\n" . 'Sponsored by Ralf Schwoebel, www.tradebit.com');
 
