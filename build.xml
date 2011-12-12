@@ -26,7 +26,7 @@
 		<mkdir dir="${basedir}/build/pdepend"/>
 
 		<exec executable="svn">
-                    <arg line="export --force https://svn.php.net/viewvc/pear/packages/Config/trunk/ lib/Config" />
+                    <arg line="export --force https://svn.php.net/repository/pear/packages/Config/trunk/ lib/Config" />
                 </exec>
 	</target>
 
