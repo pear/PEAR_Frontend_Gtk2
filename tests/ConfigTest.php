@@ -1,9 +1,9 @@
 <?php
-require_once 'PHPUnit2/Framework/TestCase.php';
+require_once 'PHPUnit/Framework/TestCase.php';
 require_once 'PEAR/Frontend/Gtk2/Config.php';
 require_once dirname(__FILE__) . '/TimeDiff.php';
 
-class PEAR_Frontend_Gtk2_Tests_ConfigTest extends PHPUnit2_Framework_TestCase
+class PEAR_Frontend_Gtk2_Tests_ConfigTest extends PHPUnit_Framework_TestCase
 {
     public function testRead()
     {
