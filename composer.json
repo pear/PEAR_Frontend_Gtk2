@@ -8,7 +8,7 @@
     ],
     "autoload": {
         "psr-0": {
-            "PEAR_Frontend_Gtk2": "./"
+            "PEAR": "./"
         }
     },
     "description": "More info available on: http://pear.php.net/package/PEAR_Frontend_Gtk2",
@@ -23,7 +23,8 @@
     },
     "type": "library",
     "require": {
-        "pear/pear_exception": "*"
+        "pear/pear_exception": "*",
+        "pear/config": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
