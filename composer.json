@@ -1,0 +1,32 @@
+{
+    "authors": [
+        {
+            "email": "cweiske@php.net",
+            "name": "Christian Weiske",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "PEAR": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/PEAR_Frontend_Gtk2",
+    "include-path": [
+        "./"
+    ],
+    "license": "LGPL",
+    "name": "pear/pear_frontend_gtk2",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=PEAR_Frontend_Gtk2",
+        "source": "https://github.com/pear/PEAR_Frontend_Gtk2"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*",
+        "pear/config": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
